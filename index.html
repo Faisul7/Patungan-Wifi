@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulator Interaktif Kas WiFi</title>
+<style>
+    *, *::before, *::after {
+        box-sizing: border-box;
+    }
+    body {
+        margin: 0;
+        padding: 15px;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        color: #1e293b;
+        background-color: #f8fafc;
+        font-size: 13px;
+        line-height: 1.3;
+    }
+    .container {
+        max-width: 540px;
+        margin: 0 auto;
+        background: #ffffff;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    }
+    .header {
+        background-color: #0f766e;
+        color: #ffffff;
+        margin: -15px -15px 12px -15px;
+        padding: 12px 15px;
+        text-align: center;
+        border-bottom: 2px solid #14b8a6;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+    }
+    .header h1 {
+        margin: 0;
+        font-size: 15px;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+    }
+    .header p {
+        margin: 3px 0 0 0;
+        font-size: 11px;
+        color: #ccfbf1;
+    }
+    .save-badge {
+        display: inline-block;
+        margin-top: 4px;
+        background-color: rgba(255, 255, 255, 0.18);
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 10px;
+        color: #ffffff;
+    }
+    .meta-bar {
+        display: flex;
+        justify-content: space-between;
+        background-color: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        padding: 8px 10px;
+        margin-bottom: 10px;
+        font-size: 12px;
+        font-weight: bold;
+        color: #334155;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .meta-bar input {
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        padding: 4px 6px;
+        font-size: 11px;
+        font-weight: bold;
+        color: #0f766e;
+        outline: none;
+    }
+    .settings-panel {
+        display: none;
+        background-color: #f0fdfa;
+        border: 1px solid #99f6e4;
+        border-radius: 6px;
+        padding: 10px;
+        margin-bottom: 12px;
+        font-size: 11px;
+    }
+    .settings-panel.show {
+        display: block;
+    }
+    .settings-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 6px;
+    }
+    .settings-item label {
+        display: block;
+        font-size: 10px;
+        color: #134e4a;
+        font-weight: bold;
+        margin-bottom: 2px;
+    }
+    .settings-item input {
+        width: 100%;
+        padding: 5px 6px;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: bold;
+    }
+    h2 {
+        font-size: 13px;
+        color: #0f766e;
+        margin: 12px 0 6px 0;
+        border-left: 3px solid #0f766e;
+        padding-left: 6px;
+        text-transform: uppercase;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .header-actions {
+        display: flex;
+        gap: 5px;
+    }
+    .btn-mini {
+        background-color: #f1f5f9;
+        border: 1px solid #cbd5e1;
+        color: #334155;
+        padding: 3px 7px;
+        font-size: 10px;
+        font-weight: bold;
+        border-radius: 4px;
+        cursor: pointer;
+        text-transform: none;
+    }
+    .btn-mini:hover {
+        background-color: #e2e8f0;
+    }
+    .btn-mini-primary {
+        background-color: #0f766e;
+        border-color: #0f766e;
+        color: #ffffff;
+    }
+    .btn-mini-primary:hover {
+        background-color: #115e59;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #ffffff;
+        border: 1px solid #cbd5e1;
+        margin-bottom: 10px;
+    }
+    th {
+        background-color: #e2e8f0;
+        color: #1e293b;
+        font-size: 10.5px;
+        font-weight: bold;
+        text-transform: uppercase;
+        padding: 6px 3px;
+        border: 1px solid #cbd5e1;
+        text-align: left;
+    }
+    td {
+        padding: 5px 3px;
+        border: 1px solid #cbd5e1;
+        font-size: 12px;
+        vertical-align: middle;
+        transition: background-color 0.2s;
+    }
+    tr:nth-child(even) {
+        background-color: #f1f5f9;
+    }
+    tr.row-lunas td {
+        background-color: #f0fdf4 !important;
+    }
+    tr.row-talang td {
+        background-color: #fefce8 !important;
+    }
+    tr.row-editing td {
+        background-color: #eff6ff !important;
+    }
+    tr.active-guide td {
+        background-color: #ccfbf1 !important;
+        border-top: 1.5px solid #0f766e;
+        border-bottom: 1.5px solid #0f766e;
+    }
+    .text-center {
+        text-align: center;
+    }
+    .text-right {
+        text-align: right;
+    }
+    .font-bold {
+        font-weight: bold;
+    }
+    .checkbox-custom {
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+        accent-color: #0f766e;
+        vertical-align: middle;
+    }
+    .checkbox-talang {
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+        accent-color: #d97706;
+        vertical-align: middle;
+    }
+    .btn-icon {
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        padding: 2px 5px;
+        font-size: 11px;
+        cursor: pointer;
+        line-height: 1;
+    }
+    .btn-icon:hover {
+        background: #e2e8f0;
+    }
+    .btn-save-row {
+        background: #0f766e;
+        color: #ffffff;
+        border-color: #0f766e;
+        font-weight: bold;
+        padding: 3px 6px;
+    }
+    .btn-del-row {
+        background: #fff1f2;
+        color: #be123c;
+        border-color: #fecdd3;
+        padding: 3px 5px;
+    }
+    .edit-input-name {
+        width: 100%;
+        padding: 3px 4px;
+        font-size: 11px;
+        font-weight: bold;
+        border: 1px solid #0f766e;
+        border-radius: 3px;
+    }
+    .edit-input-price {
+        width: 72px;
+        padding: 3px 4px;
+        font-size: 11px;
+        font-weight: bold;
+        border: 1px solid #0f766e;
+        border-radius: 3px;
+        text-align: right;
+    }
+    .price-tag {
+        display: inline-block;
+        font-weight: bold;
+        color: #0f766e;
+        font-size: 11.5px;
+        cursor: pointer;
+        padding: 2px 5px;
+        border-radius: 4px;
+        background: rgba(15, 118, 110, 0.08);
+    }
+    .price-tag:hover {
+        background: rgba(15, 118, 110, 0.16);
+    }
+    .box-card {
+        background-color: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        padding: 8px 10px;
+        margin-bottom: 10px;
+    }
+    .box-title {
+        font-weight: bold;
+        color: #0f766e;
+        font-size: 12px;
+        margin-bottom: 6px;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 4px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+    .setor-toggle {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+    }
+    .setor-btn {
+        background: #e2e8f0;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        padding: 3px 7px;
+        font-size: 10px;
+        font-weight: bold;
+        cursor: pointer;
+        color: #334155;
+    }
+    .setor-btn.active {
+        background: #0f766e;
+        color: white;
+        border-color: #0f766e;
+    }
+    .progress-wrap {
+        background-color: #e2e8f0;
+        height: 6px;
+        border-radius: 3px;
+        overflow: hidden;
+        margin: 6px 0 8px 0;
+    }
+    .progress-bar {
+        background-color: #0f766e;
+        height: 100%;
+        width: 0%;
+        transition: width 0.3s ease;
+    }
+    .status-note {
+        margin-top: 6px;
+        padding: 5px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: bold;
+        text-align: center;
+    }
+    .status-kurang {
+        background-color: #fef3c7;
+        color: #92400e;
+        border: 1px solid #fde68a;
+    }
+    .status-aman {
+        background-color: #dcfce7;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+    }
+    .action-bar {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 10px;
+    }
+    .btn-tool {
+        flex: 1;
+        padding: 7px 6px;
+        font-size: 11px;
+        font-weight: bold;
+        border-radius: 4px;
+        border: 1px solid #cbd5e1;
+        cursor: pointer;
+        background-color: #f8fafc;
+        color: #334155;
+        text-align: center;
+    }
+    .btn-tool:hover {
+        background-color: #e2e8f0;
+    }
+    .btn-wa {
+        background-color: #0f766e;
+        color: #ffffff;
+        border-color: #0f766e;
+    }
+    .btn-reset {
+        background-color: #fff1f2;
+        color: #be123c;
+        border-color: #fecdd3;
+    }
+    .formula-box {
+        background-color: #f0fdfa;
+        border: 1px solid #99f6e4;
+        border-radius: 4px;
+        padding: 8px 10px;
+        font-size: 11px;
+        color: #134e4a;
+        margin-top: 10px;
+    }
+    .tgl-input {
+        width: 44px;
+        font-size: 11px;
+        border: 1px solid #cbd5e1;
+        border-radius: 3px;
+        padding: 3px 2px;
+        text-align: center;
+    }
+    @media print {
+        body { padding: 0; background: #fff; }
+        .container { box-shadow: none; max-width: 100%; padding: 0; }
+        .action-bar, .save-badge, .header-actions, .settings-panel, .col-aksi { display: none !important; }
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>CATATAN &amp; HITUNGAN KAS WIFI</h1>
+        <p>Bisa Edit Nama &amp; Harga Manual, Hitung Otomatis Talangan &amp; Hasil Bersih</p>
+        <div class="save-badge" id="save-indicator">✓ Tersimpan Otomatis di HP/Browser</div>
+    </div>
+
+    <div class="meta-bar">
+        <div>Bulan : <input type="text" id="input-bulan" placeholder="Contoh: November" style="width: 100px;" oninput="saveMeta()"></div>
+        <div>Tgl Setor : <input type="text" id="input-tgl" placeholder="Contoh: 10/11" style="width: 70px;" oninput="saveMeta()"></div>
+    </div>
+
+    <!-- Panel Pengaturan Tarif Dasar (Untuk naikkan harga serentak) -->
+    <div class="settings-panel" id="settings-panel">
+        <div style="font-weight: bold; color: #0f766e; margin-bottom: 4px; display: flex; justify-content: space-between;">
+            <span>⚙️ PENGATURAN HARGA IURAN &amp; SETORAN</span>
+            <span style="cursor: pointer; color: #64748b;" onclick="toggleSettings()">✕ Tutup</span>
+        </div>
+        <div style="font-size: 10px; color: #475569; margin-bottom: 6px;">
+            Jika harga iuran naik, ubah nominal di bawah ini lalu klik <b>Terapkan ke Tabel</b>:
+        </div>
+        <div class="settings-grid">
+            <div class="settings-item">
+                <label>Tarif Normal / Atas (Rp)</label>
+                <input type="number" id="cfg-tarif1" value="25000" step="1000">
+            </div>
+            <div class="settings-item">
+                <label>Tarif Khusus / Bawah (Rp)</label>
+                <input type="number" id="cfg-tarif2" value="20000" step="1000">
+            </div>
+            <div class="settings-item">
+                <label>Pilihan Setor 1 (Rp)</label>
+                <input type="number" id="cfg-setor1" value="50000" step="5000">
+            </div>
+            <div class="settings-item">
+                <label>Pilihan Setor 2 (Rp)</label>
+                <input type="number" id="cfg-setor2" value="150000" step="5000">
+            </div>
+        </div>
+        <div style="margin-top: 8px; display: flex; gap: 6px;">
+            <button class="btn-mini btn-mini-primary" style="flex: 1; padding: 6px;" onclick="applyGlobalSettings(true)">⚡ Terapkan &amp; Update Tarif Anggota</button>
+            <button class="btn-mini" style="flex: 1; padding: 6px;" onclick="applyGlobalSettings(false)">Simpan Patokan Saja</button>
+        </div>
+    </div>
+
+    <h2>
+        <span id="title-anggota">1. Daftar Anggota (8 Orang)</span>
+        <div class="header-actions">
+            <button class="btn-mini" onclick="toggleSettings()">⚙️ Atur Tarif</button>
+            <button class="btn-mini btn-mini-primary" onclick="addMember()">+ Tambah</button>
+        </div>
+    </h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th class="text-center" style="width: 6%;">NO</th>
+                <th style="width: 26%;">NAMA</th>
+                <th class="text-center" style="width: 22%;">HARGA IURAN</th>
+                <th class="text-center" style="width: 11%;">BAYAR</th>
+                <th class="text-center" style="width: 11%;">TALANG</th>
+                <th class="text-center" style="width: 12%;">TGL</th>
+                <th class="text-center col-aksi" style="width: 12%;">EDIT</th>
+            </tr>
+        </thead>
+        <tbody id="member-tbody">
+            <!-- Diisi otomatis oleh JavaScript -->
+        </tbody>
+        <tfoot>
+            <tr style="background-color: #e2e8f0; font-weight: bold;">
+                <td colspan="2" class="text-right">TOTAL :</td>
+                <td class="text-center" id="total-rp" style="color: #0f766e;">Rp 0</td>
+                <td class="text-center" id="total-lunas">0/8</td>
+                <td class="text-center" id="total-talang">0 Org</td>
+                <td colspan="2"></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="box-card">
+        <div class="box-title">
+            <span>Rekap Kas &amp; Talangan Bulan Ini</span>
+            <div class="setor-toggle">
+                <span>Setor:</span>
+                <button class="setor-btn active" id="btn-setor1" onclick="setSetor(config.setor1)">50rb</button>
+                <button class="setor-btn" id="btn-setor2" onclick="setSetor(config.setor2)">150rb</button>
+                <button class="setor-btn" id="btn-setor-custom" onclick="promptCustomSetor()" title="Ketik nominal setoran manual">✏️ Manual</button>
+            </div>
+        </div>
+
+        <div class="progress-wrap" title="Progress Pembayaran Lunas">
+            <div class="progress-bar" id="lunas-bar"></div>
+        </div>
+
+        <table style="margin-bottom: 0; border: none;">
+            <tr>
+                <td style="border: none; padding: 4px 0; background: transparent;">1. Uang Sudah Masuk</td>
+                <td style="border: none; padding: 4px 0; font-weight: bold; background: transparent;" class="text-right" id="rekap-masuk">: Rp 0</td>
+                <td style="border: none; padding: 4px 0 4px 8px; background: transparent;">3. Setoran Pusat</td>
+                <td style="border: none; padding: 4px 0; font-weight: bold; background: transparent;" class="text-right" id="rekap-setor">: Rp 50.000</td>
+            </tr>
+            <tr>
+                <td style="border: none; padding: 4px 0; color: #b45309; background: transparent;">2. Uang Ditalangi</td>
+                <td style="border: none; padding: 4px 0; font-weight: bold; color: #b45309; background: transparent;" class="text-right" id="rekap-talang">: Rp 0</td>
+                <td style="border: none; padding: 4px 0 4px 8px; color: #0f766e; background: transparent;" class="font-bold">4. Hasil Bersih</td>
+                <td style="border: none; padding: 4px 0; color: #0f766e; font-size: 13px; background: transparent;" class="text-right font-bold" id="rekap-bersih">: Rp 0</td>
+            </tr>
+        </table>
+
+        <div id="status-box" class="status-note status-kurang">
+            Menunggu pembayaran anggota...
+        </div>
+    </div>
+
+    <div class="action-bar">
+        <button class="btn-tool btn-wa" onclick="copyRekapWA()">📋 Salin Rekap WA</button>
+        <button class="btn-tool" onclick="window.print()">🖨️ Cetak / PDF</button>
+        <button class="btn-tool btn-reset" onclick="resetBulanBaru()">🔄 Reset Bulan Baru</button>
+    </div>
+
+    <h2>
+        <span id="title-panduan">2. Tabel Simulasi Hasil Bersih</span>
+        <span style="font-size: 10px; font-weight: normal; color: #0f766e;">★ Otomatis mengikuti harga tarif</span>
+    </h2>
+    <table>
+        <thead>
+            <tr>
+                <th>KOMPOSISI TARIF ANGGOTA</th>
+                <th class="text-right">TERKUMPUL</th>
+                <th class="text-right" style="background-color: #ccfbf1; color: #115e59;" id="th-setor1">SETOR 50RB</th>
+                <th class="text-right" style="background-color: #dbeafe; color: #1e40af;" id="th-setor2">SETOR 150RB</th>
+            </tr>
+        </thead>
+        <tbody id="guide-tbody">
+            <!-- Diisi otomatis sesuai tarif dasar -->
+        </tbody>
+    </table>
+
+    <div class="formula-box">
+        <b>Cara Edit Harga Manual:</b> Klik tombol <b>✏️</b> di sebelah kanan baris anggota (atau klik langsung pada angkanya) untuk mengubah nama maupun mengetik harga iuran baru secara bebas. Untuk menaikkan harga semua orang sekaligus, klik tombol <b>⚙️ Atur Tarif</b> di atas tabel.
+    </div>
+</div>
+
+<script>
+    const STORAGE_KEY = "kas_wifi_pintar_v2";
+
+    let config = {
+        tarif1: 25000,
+        tarif2: 20000,
+        setor1: 50000,
+        setor2: 150000
+    };
+
+    const defaultMembers = [
+        { id: 1, name: "P. Basid", tariff: 20000, bayar: false, talang: false, tgl: "" },
+        { id: 2, name: "P. Abel", tariff: 25000, bayar: false, talang: false, tgl: "" },
+        { id: 3, name: "Hikmah", tariff: 20000, bayar: false, talang: false, tgl: "" },
+        { id: 4, name: "P. Rahmah", tariff: 25000, bayar: false, talang: false, tgl: "" },
+        { id: 5, name: "P. Ap", tariff: 25000, bayar: false, talang: false, tgl: "" },
+        { id: 6, name: "P. Roni", tariff: 25000, bayar: false, talang: false, tgl: "" },
+        { id: 7, name: "B. Farit", tariff: 25000, bayar: false, talang: false, tgl: "" },
+        { id: 8, name: "P. Pit", tariff: 25000, bayar: false, talang: false, tgl: "" }
+    ];
+
+    let members = JSON.parse(JSON.stringify(defaultMembers));
+    let setorAmount = 50000;
+    let editingId = null;
+
+    function getTodayShort() {
+        const d = new Date();
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        return `${day}/${month}`;
+    }
+
+    function formatShortRb(num) {
+        if (num % 1000 === 0) return (num / 1000) + "rb";
+        return num.toLocaleString("id-ID");
+    }
+
+    function formatRupiah(num) {
+        return "Rp " + num.toLocaleString("id-ID");
+    }
+
+    function loadData() {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                if (parsed.members) members = parsed.members;
+                if (parsed.config) config = parsed.config;
+                if (parsed.setorAmount !== undefined) setorAmount = parsed.setorAmount;
+                if (parsed.bulan) document.getElementById("input-bulan").value = parsed.bulan;
+                if (parsed.tglSetor) document.getElementById("input-tgl").value = parsed.tglSetor;
+            } catch (e) {}
+        }
+        document.getElementById("cfg-tarif1").value = config.tarif1;
+        document.getElementById("cfg-tarif2").value = config.tarif2;
+        document.getElementById("cfg-setor1").value = config.setor1;
+        document.getElementById("cfg-setor2").value = config.setor2;
+        updateSetorButtons();
+    }
+
+    function saveData() {
+        const data = {
+            members: members,
+            config: config,
+            setorAmount: setorAmount,
+            bulan: document.getElementById("input-bulan").value,
+            tglSetor: document.getElementById("input-tgl").value
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        const badge = document.getElementById("save-indicator");
+        badge.innerText = "✓ Perubahan Tersimpan Otomatis";
+    }
+
+    function saveMeta() {
+        saveData();
+    }
+
+    function toggleSettings() {
+        document.getElementById("settings-panel").classList.toggle("show");
+    }
+
+    function applyGlobalSettings(updateMembersTariff) {
+        const newT1 = parseInt(document.getElementById("cfg-tarif1").value) || 25000;
+        const newT2 = parseInt(document.getElementById("cfg-tarif2").value) || 20000;
+        const newS1 = parseInt(document.getElementById("cfg-setor1").value) || 50000;
+        const newS2 = parseInt(document.getElementById("cfg-setor2").value) || 150000;
+
+        if (updateMembersTariff) {
+            members.forEach(m => {
+                if (m.tariff === config.tarif1) m.tariff = newT1;
+                else if (m.tariff === config.tarif2) m.tariff = newT2;
+            });
+        }
+
+        if (setorAmount === config.setor1) setorAmount = newS1;
+        else if (setorAmount === config.setor2) setorAmount = newS2;
+
+        config = { tarif1: newT1, tarif2: newT2, setor1: newS1, setor2: newS2 };
+        updateSetorButtons();
+        saveData();
+        renderTable();
+        document.getElementById("settings-panel").classList.remove("show");
+    }
+
+    function updateSetorButtons() {
+        const btn1 = document.getElementById("btn-setor1");
+        const btn2 = document.getElementById("btn-setor2");
+        const btnCustom = document.getElementById("btn-setor-custom");
+
+        btn1.innerText = formatShortRb(config.setor1);
+        btn2.innerText = formatShortRb(config.setor2);
+
+        btn1.classList.toggle("active", setorAmount === config.setor1);
+        btn2.classList.toggle("active", setorAmount === config.setor2);
+        btnCustom.classList.toggle("active", setorAmount !== config.setor1 && setorAmount !== config.setor2);
+    }
+
+    function promptCustomSetor() {
+        const val = prompt("Masukkan nominal Setoran Pusat manual (contoh: 100000):", setorAmount);
+        if (val !== null) {
+            const num = parseInt(val.replace(/[^0-9]/g, ''));
+            if (!isNaN(num) && num >= 0) {
+                setorAmount = num;
+                updateSetorButtons();
+                saveData();
+                renderTable();
+            }
+        }
+    }
+
+    function startEdit(id) {
+        editingId = id;
+        renderTable();
+    }
+
+    function saveRowEdit(id) {
+        const nameInput = document.getElementById(`edit-name-${id}`);
+        const priceInput = document.getElementById(`edit-price-${id}`);
+        const m = members.find(item => item.id === id);
+        if (m && nameInput && priceInput) {
+            const newName = nameInput.value.trim();
+            const newPrice = parseInt(priceInput.value);
+            if (newName) m.name = newName;
+            if (!isNaN(newPrice) && newPrice >= 0) m.tariff = newPrice;
+        }
+        editingId = null;
+        saveData();
+        renderTable();
+    }
+
+    function deleteMember(id) {
+        const m = members.find(item => item.id === id);
+        if (!m) return;
+        if (confirm(`Hapus "${m.name}" dari daftar anggota?`)) {
+            members = members.filter(item => item.id !== id);
+            editingId = null;
+            saveData();
+            renderTable();
+        }
+    }
+
+    function addMember() {
+        const newId = members.length > 0 ? Math.max(...members.map(m => m.id)) + 1 : 1;
+        members.push({
+            id: newId,
+            name: "Anggota Baru",
+            tariff: config.tarif1,
+            bayar: false,
+            talang: false,
+            tgl: ""
+        });
+        editingId = newId;
+        saveData();
+        renderTable();
+    }
+
+    function renderGuideTable(countT1) {
+        const guideTbody = document.getElementById("guide-tbody");
+        guideTbody.innerHTML = "";
+        const totalMembers = members.length;
+
+        document.getElementById("th-setor1").innerText = "SETOR " + formatShortRb(config.setor1).toUpperCase();
+        document.getElementById("th-setor2").innerText = "SETOR " + formatShortRb(config.setor2).toUpperCase();
+
+        for (let i = totalMembers; i >= 0; i--) {
+            const j = totalMembers - i;
+            const terkumpul = (i * config.tarif1) + (j * config.tarif2);
+            const hasil1 = terkumpul - config.setor1;
+            const hasil2 = terkumpul - config.setor2;
+
+            const tr = document.createElement("tr");
+            if (i === countT1) tr.className = "active-guide";
+
+            tr.innerHTML = `
+                <td>${i} org × ${formatShortRb(config.tarif1)} | ${j} org × ${formatShortRb(config.tarif2)}</td>
+                <td class="text-right font-bold">${formatRupiah(terkumpul)}</td>
+                <td class="text-right font-bold" style="color: #0f766e;">${formatRupiah(hasil1)}</td>
+                <td class="text-right font-bold" style="color: #1d4ed8;">${formatRupiah(hasil2)}</td>
+            `;
+            guideTbody.appendChild(tr);
+        }
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById("member-tbody");
+        tbody.innerHTML = "";
+
+        const totalMembers = members.length;
+        document.getElementById("title-anggota").innerText = `1. Daftar Anggota (${totalMembers} Orang)`;
+
+        let totalRp = 0;
+        let countLunas = 0;
+        let countTalang = 0;
+        let cashInHand = 0;
+        let countT1 = 0;
+
+        members.forEach((m, idx) => {
+            if (m.tariff === config.tarif1) countT1++;
+
+            if (m.bayar || m.talang) {
+                totalRp += m.tariff;
+            }
+            if (m.bayar) {
+                countLunas++;
+                cashInHand += m.tariff;
+            }
+            if (m.talang) {
+                countTalang++;
+            }
+
+            const isEditing = (editingId === m.id);
+            const tr = document.createElement("tr");
+            if (isEditing) tr.className = "row-editing";
+            else if (m.bayar) tr.className = "row-lunas";
+            else if (m.talang) tr.className = "row-talang";
+
+            if (isEditing) {
+                tr.innerHTML = `
+                    <td class="text-center">${idx + 1}</td>
+                    <td>
+                        <input type="text" id="edit-name-${m.id}" class="edit-input-name" value="${m.name}" placeholder="Nama">
+                    </td>
+                    <td class="text-center">
+                        <input type="number" id="edit-price-${m.id}" class="edit-input-price" value="${m.tariff}" step="1000">
+                    </td>
+                    <td class="text-center">
+                        <input type="checkbox" class="checkbox-custom" ${m.bayar ? 'checked' : ''} onchange="toggleBayar(${m.id}, this.checked)">
+                    </td>
+                    <td class="text-center">
+                        <input type="checkbox" class="checkbox-talang" ${m.talang ? 'checked' : ''} onchange="toggleTalang(${m.id}, this.checked)">
+                    </td>
+                    <td class="text-center">
+                        <input type="text" class="tgl-input" value="${m.tgl}" placeholder="tgl" oninput="updateTgl(${m.id}, this.value)">
+                    </td>
+                    <td class="text-center col-aksi" style="white-space: nowrap;">
+                        <button class="btn-icon btn-save-row" onclick="saveRowEdit(${m.id})" title="Simpan">✓</button>
+                        <button class="btn-icon btn-del-row" onclick="deleteMember(${m.id})" title="Hapus">🗑️</button>
+                    </td>
+                `;
+            } else {
+                tr.innerHTML = `
+                    <td class="text-center">${idx + 1}</td>
+                    <td class="font-bold">${m.name}</td>
+                    <td class="text-center">
+                        <span class="price-tag" onclick="startEdit(${m.id})" title="Klik untuk ubah harga manual">${formatRupiah(m.tariff)}</span>
+                    </td>
+                    <td class="text-center">
+                        <input type="checkbox" class="checkbox-custom" ${m.bayar ? 'checked' : ''} onchange="toggleBayar(${m.id}, this.checked)">
+                    </td>
+                    <td class="text-center">
+                        <input type="checkbox" class="checkbox-talang" ${m.talang ? 'checked' : ''} onchange="toggleTalang(${m.id}, this.checked)">
+                    </td>
+                    <td class="text-center">
+                        <input type="text" class="tgl-input" value="${m.tgl}" placeholder="tgl" oninput="updateTgl(${m.id}, this.value)">
+                    </td>
+                    <td class="text-center col-aksi">
+                        <button class="btn-icon" onclick="startEdit(${m.id})" title="Edit Nama & Harga">✏️</button>
+                    </td>
+                `;
+            }
+            tbody.appendChild(tr);
+        });
+
+        renderGuideTable(countT1);
+
+        const pct = totalMembers > 0 ? Math.round((countLunas / totalMembers) * 100) : 0;
+        document.getElementById("lunas-bar").style.width = pct + "%";
+
+        document.getElementById("total-rp").innerText = formatRupiah(totalRp);
+        document.getElementById("total-lunas").innerText = `${countLunas}/${totalMembers}`;
+        document.getElementById("total-talang").innerText = countTalang + " Org";
+
+        document.getElementById("rekap-masuk").innerText = ": " + formatRupiah(cashInHand);
+        document.getElementById("rekap-setor").innerText = ": " + formatRupiah(setorAmount);
+
+        let talanganNeeded = setorAmount - cashInHand;
+        if (talanganNeeded < 0) talanganNeeded = 0;
+        document.getElementById("rekap-talang").innerText = ": " + formatRupiah(talanganNeeded);
+
+        let totalPotensial = 0;
+        members.forEach(m => totalPotensial += m.tariff);
+        let netProfit = totalPotensial - setorAmount;
+        document.getElementById("rekap-bersih").innerText = ": " + formatRupiah(netProfit);
+
+        const statusBox = document.getElementById("status-box");
+        const sisaBelumBayar = totalPotensial - cashInHand;
+
+        if (totalMembers > 0 && countLunas === totalMembers) {
+            statusBox.className = "status-note status-aman";
+            statusBox.innerText = `🎉 Semua ${totalMembers} anggota sudah LUNAS! Keuntungan bersih Anda penuh ${formatRupiah(netProfit)}.`;
+        } else if (talanganNeeded > 0) {
+            statusBox.className = "status-note status-kurang";
+            statusBox.innerText = `⚠️ Uang tunai kurang ${formatRupiah(talanganNeeded)} untuk setor ${formatRupiah(setorAmount)}. Sisa tagihan di luar: ${formatRupiah(sisaBelumBayar)}.`;
+        } else {
+            const lebihTunai = cashInHand - setorAmount;
+            statusBox.className = "status-note status-aman";
+            statusBox.innerText = `✅ Uang tunai cukup untuk setor! Sudah lebih ${formatRupiah(lebihTunai)} di tangan (+ sisa tagihan ${formatRupiah(sisaBelumBayar)}).`;
+        }
+    }
+
+    function toggleBayar(id, val) {
+        const m = members.find(item => item.id === id);
+        if (m) {
+            m.bayar = val;
+            if (val) {
+                m.talang = false;
+                if (!m.tgl) m.tgl = getTodayShort();
+            } else {
+                m.tgl = "";
+            }
+            saveData();
+            renderTable();
+        }
+    }
+
+    function toggleTalang(id, val) {
+        const m = members.find(item => item.id === id);
+        if (m) {
+            m.talang = val;
+            if (val) m.bayar = false;
+            saveData();
+            renderTable();
+        }
+    }
+
+    function updateTgl(id, val) {
+        const m = members.find(item => item.id === id);
+        if (m) {
+            m.tgl = val;
+            saveData();
+        }
+    }
+
+    function setSetor(amt) {
+        setorAmount = amt;
+        updateSetorButtons();
+        saveData();
+        renderTable();
+    }
+
+    function resetBulanBaru() {
+        if (confirm("Kosongkan semua centang Bayar, Talang, dan Tanggal untuk mulai bulan baru? (Daftar nama & harga iuran tetap disimpan)")) {
+            members.forEach(m => {
+                m.bayar = false;
+                m.talang = false;
+                m.tgl = "";
+            });
+            saveData();
+            renderTable();
+        }
+    }
+
+    function copyRekapWA() {
+        const bulan = document.getElementById("input-bulan").value || "Bulan Ini";
+        let text = `*REKAP IURAN WIFI (${bulan.toUpperCase()})*\n`;
+        text += `--------------------------------\n`;
+        let cashInHand = 0;
+        let countLunas = 0;
+
+        members.forEach((m, i) => {
+            const st = m.bayar ? `✅ Lunas (${m.tgl || '-'})` : (m.talang ? `⏳ Ditalangi` : `❌ Belum`);
+            text += `${i + 1}. ${m.name} (${formatShortRb(m.tariff)}) : ${st}\n`;
+            if (m.bayar) {
+                cashInHand += m.tariff;
+                countLunas++;
+            }
+        });
+
+        let talanganNeeded = Math.max(0, setorAmount - cashInHand);
+        let totalPotensial = members.reduce((acc, m) => acc + m.tariff, 0);
+        let netProfit = totalPotensial - setorAmount;
+
+        text += `--------------------------------\n`;
+        text += `• Status Lunas : ${countLunas}/${members.length} Orang\n`;
+        text += `• Uang Masuk : ${formatRupiah(cashInHand)}\n`;
+        text += `• Target Setor : ${formatRupiah(setorAmount)}\n`;
+        text += `• Uang Talangan : ${formatRupiah(talanganNeeded)}\n`;
+        text += `• Hasil Bersih : ${formatRupiah(netProfit)}\n`;
+
+        navigator.clipboard.writeText(text).then(() => {
+            alert("Rekap berhasil disalin! Siap ditempel (Paste) ke WhatsApp.");
+        }).catch(() => {
+            prompt("Salin teks rekap di bawah ini:", text);
+        });
+    }
+
+    loadData();
+    renderTable();
+</script>
+
+</body>
+</html>
